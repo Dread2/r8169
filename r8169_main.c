@@ -628,6 +628,7 @@ struct rtl8169_private {
 	dma_addr_t counters_phys_addr;
 	struct rtl8169_counters *counters;
 	struct rtl8169_tc_offsets tc_offset;
+	u8 wol_enabled;
 	u32 saved_wolopts;
 	int eee_adv;
 
