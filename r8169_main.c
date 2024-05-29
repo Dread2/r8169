@@ -10,6 +10,7 @@
  */
 
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/pci.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
@@ -89,8 +90,12 @@
 static int s5wol = 0;
 
 /* Save WOL state on sleep */
-module_param(s5wol, int, 0); 
+module_param(s5wol, int, 0);
 MODULE_PARM_DESC(s5wol, "Enable adapter to save WOL shutdown state");
+
+static int rtl8169_set_s5wol(void) {
+	return s5wol;
+}
 
 static const struct {
 	const char *name;
@@ -1487,7 +1492,6 @@ static void rtl8169_get_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
 
 	wol->supported = WAKE_ANY;
 	wol->wolopts = tp->saved_wolopts;
-	/* Add hook to get WOL state */
 }
 
 static void __rtl8169_set_wol(struct rtl8169_private *tp, u32 wolopts)
@@ -1560,6 +1564,7 @@ static void __rtl8169_set_wol(struct rtl8169_private *tp, u32 wolopts)
 		rtl_set_d3_pll_down(tp, !wolopts);
 		tp->dev->wol_enabled = wolopts ? 1 : 0;
 	}
+
 }
 
 static int rtl8169_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
@@ -1570,8 +1575,7 @@ static int rtl8169_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
 		return -EINVAL;
 
 	tp->saved_wolopts = wol->wolopts;
-	__rtl8169_set_wol(tp, tp->saved_wolopts);
-
+		__rtl8169_set_wol(tp, tp->saved_wolopts);
 	return 0;
 }
 
@@ -5228,7 +5232,6 @@ static int rtl_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct net_device *dev;
 	u32 txconfig;
 	u16 xid;
-
 	dev = devm_alloc_etherdev(&pdev->dev, sizeof (*tp));
 	if (!dev)
 		return -ENOMEM;
