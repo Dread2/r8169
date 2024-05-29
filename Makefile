@@ -27,6 +27,8 @@ r8169-objs := r8169_main.o r8169_firmware.o r8169_phy_config.o
 all:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
 
+sign:
+	/usr/src/linux/scripts/sign-file sha3-512 /usr/src/linux/certs/signing_key.pem /usr/src/linux/certs/signing_key.x509 r8169.ko
 modules_install:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules_install
 
