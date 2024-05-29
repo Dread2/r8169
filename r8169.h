@@ -71,6 +71,11 @@ enum mac_version {
 	RTL_GIGA_MAC_NONE
 };
 
+enum wol_capability {
+	WOL_DISABLED = 0,
+	WOL_ENABLED = 1
+};
+
 struct rtl8169_private;
 struct r8169_led_classdev;
 
