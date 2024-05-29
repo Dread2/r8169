@@ -85,6 +85,13 @@
 #define JUMBO_7K	(7 * SZ_1K - VLAN_ETH_HLEN - ETH_FCS_LEN)
 #define JUMBO_9K	(9 * SZ_1K - VLAN_ETH_HLEN - ETH_FCS_LEN)
 
+/* Kernel module parameters */
+static int s5wol = 0;
+
+/* Save WOL state on sleep */
+module_param(s5wol, int, 0); 
+MODULE_PARM_DESC(s5wol, "Enable adapter to save WOL shutdown state");
+
 static const struct {
 	const char *name;
 	const char *fw_name;
@@ -1480,6 +1487,7 @@ static void rtl8169_get_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
 
 	wol->supported = WAKE_ANY;
 	wol->wolopts = tp->saved_wolopts;
+	/* Add hook to get WOL state */
 }
 
 static void __rtl8169_set_wol(struct rtl8169_private *tp, u32 wolopts)
