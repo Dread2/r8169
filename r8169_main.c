@@ -10,7 +10,6 @@
  */
 
 #include <linux/module.h>
-#include <linux/moduleparam.h>
 #include <linux/pci.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
@@ -86,16 +85,9 @@
 #define JUMBO_7K	(7 * SZ_1K - VLAN_ETH_HLEN - ETH_FCS_LEN)
 #define JUMBO_9K	(9 * SZ_1K - VLAN_ETH_HLEN - ETH_FCS_LEN)
 
-/* Kernel module parameters */
-static int s5wol = 0;
-
-/* Save WOL state on sleep */
-module_param(s5wol, int, 0);
-MODULE_PARM_DESC(s5wol, "Enable adapter to save WOL shutdown state");
-
-static int rtl8169_set_s5wol(void) {
-	return s5wol;
-}
+static int wol_param = 0;
+module_param(wol_param, int, 0);
+MODULE_PARM_DESC(wol_param, "Current state of system WOL");
 
 static const struct {
 	const char *name;
@@ -640,7 +632,6 @@ struct rtl8169_private {
 	dma_addr_t counters_phys_addr;
 	struct rtl8169_counters *counters;
 	struct rtl8169_tc_offsets tc_offset;
-	u8 wol_enabled;
 	u32 saved_wolopts;
 	int eee_adv;
 
@@ -1486,6 +1477,14 @@ static void rtl_link_chg_patch(struct rtl8169_private *tp)
 
 #define WAKE_ANY (WAKE_PHY | WAKE_MAGIC | WAKE_UCAST | WAKE_BCAST | WAKE_MCAST)
 
+int r8169_get_wolparam(void) {
+	return wol_param;
+}
+
+void r8169_set_wolparam(int state) {
+	wol_param = state;
+}
+
 static void rtl8169_get_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
 {
 	struct rtl8169_private *tp = netdev_priv(dev);
@@ -1564,7 +1563,6 @@ static void __rtl8169_set_wol(struct rtl8169_private *tp, u32 wolopts)
 		rtl_set_d3_pll_down(tp, !wolopts);
 		tp->dev->wol_enabled = wolopts ? 1 : 0;
 	}
-
 }
 
 static int rtl8169_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
@@ -1575,7 +1573,8 @@ static int rtl8169_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
 		return -EINVAL;
 
 	tp->saved_wolopts = wol->wolopts;
-		__rtl8169_set_wol(tp, tp->saved_wolopts);
+	__rtl8169_set_wol(tp, tp->saved_wolopts);
+
 	return 0;
 }
 
@@ -5232,6 +5231,7 @@ static int rtl_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct net_device *dev;
 	u32 txconfig;
 	u16 xid;
+
 	dev = devm_alloc_etherdev(&pdev->dev, sizeof (*tp));
 	if (!dev)
 		return -ENOMEM;
