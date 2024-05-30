@@ -71,11 +71,6 @@ enum mac_version {
 	RTL_GIGA_MAC_NONE
 };
 
-enum wol_capability {
-	WOL_DISABLED = 0,
-	WOL_ENABLED = 1
-};
-
 struct rtl8169_private;
 struct r8169_led_classdev;
 
@@ -91,3 +86,7 @@ int rtl8168_get_led_mode(struct rtl8169_private *tp);
 int rtl8168_led_mod_ctrl(struct rtl8169_private *tp, u16 mask, u16 val);
 struct r8169_led_classdev *rtl8168_init_leds(struct net_device *ndev);
 void r8169_remove_leds(struct r8169_led_classdev *leds);
+
+int r8169_get_wolparam(void);
+
+void r8169_set_wolparam(int state);

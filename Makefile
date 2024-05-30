@@ -1,3 +1,4 @@
+
 # SPDX-License-Identifier: GPL-2.0-only
 ################################################################################
 #
@@ -20,15 +21,14 @@
 KDIR ?= "/lib/modules/$(shell uname -r)/build"
 # Directory for module updates
 MUPDATE ?= "/lib/modules/$(shell uname -r)/updates"
-
-obj-m += r8169.o
-r8169-objs := r8169_main.o r8169_firmware.o r8169_phy_config.o
+# Hash for signing
+HASH = sha3-512
+obj-m := r8169.o
+r8169-objs := r8169_main.o r8169_firmware.o r8169_phy_config.o r8169_leds.o
 
 all:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
 
-sign:
-	/usr/src/linux/scripts/sign-file sha3-512 /usr/src/linux/certs/signing_key.pem /usr/src/linux/certs/signing_key.x509 r8169.ko
 modules_install:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules_install
 
@@ -37,3 +37,8 @@ clean:
         ifdef $(MUPDATE)
 	$(MAKE) -c $(KDIR) M=$(MUPDATE) clean
         endif
+
+sign:
+	/usr/src/linux/scripts/sign-file $(HASH) /usr/src/linux/certs/signing_key.pem /usr/src/linux/certs/signing_key.x509 r8169.ko
+
+.PHONY: all modules_install clean sign
