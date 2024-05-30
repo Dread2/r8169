@@ -85,7 +85,7 @@
 #define JUMBO_7K	(7 * SZ_1K - VLAN_ETH_HLEN - ETH_FCS_LEN)
 #define JUMBO_9K	(9 * SZ_1K - VLAN_ETH_HLEN - ETH_FCS_LEN)
 
-static int wol_param = 0;
+static int wol_param = 1;
 module_param(wol_param, int, 0);
 MODULE_PARM_DESC(wol_param, "Current state of system WOL");
 
@@ -5426,7 +5426,7 @@ static int rtl_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	if (pci_dev_run_wake(pdev))
 		pm_runtime_put_sync(&pdev->dev);
-
+	printk(KERN_INFO "Intializing module_parameter: wol_param = %d\n", wol_param);
 	return 0;
 }
 
