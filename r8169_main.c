@@ -1491,6 +1491,7 @@ static void rtl8169_get_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
 
 	wol->supported = WAKE_ANY;
 	wol->wolopts = tp->saved_wolopts;
+	r8169_set_wolparam(wolopts)
 }
 
 static void __rtl8169_set_wol(struct rtl8169_private *tp, u32 wolopts)
